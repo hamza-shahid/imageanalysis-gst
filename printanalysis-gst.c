@@ -1,27 +1,7 @@
-/**
- * SECTION:element-coloreffects
- * @title: coloreffects
- *
- * Map colors of the video input to a lookup table
- *
- * ## Example launch line
- * |[
- * gst-launch-1.0 -v videotestsrc ! coloreffects preset=heat ! videoconvert !
- *     autovideosink
- * ]| This pipeline shows the effect of coloreffects on a test stream.
- *
- */
-
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
 #include <gst/video/video.h>
 
 #include "printanalysis-gst.h"
 #include "imageanalysis-rgb.h"
-
-//#define DEFAULT_PROP_PRESET GST_COLOR_EFFECTS_PRESET_NONE
 
 GST_DEBUG_CATEGORY_STATIC (printanalysis_debug);
 #define GST_CAT_DEFAULT (printanalysis_debug)
@@ -327,5 +307,5 @@ static void gst_print_analysis_finalize(GObject* object)
 static void gst_print_analysis_init(GstPrintAnalysis* filter)
 {
 	GObjectClass* gobject_class = G_OBJECT_CLASS(filter);
-	gobject_class->finalize = gst_print_analysis_finalize;
+	//gobject_class->finalize = gst_print_analysis_finalize;
 }
