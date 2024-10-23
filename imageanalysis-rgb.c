@@ -350,6 +350,7 @@ void init_rgb(ImageAnalysis* pImageAnalysis, AnalysisOpts* opts, int iImageWidth
     pImageAnalysis->opts = *opts;
     pImageAnalysis->iImageWidth = iImageWidth;
     pImageAnalysis->iImageHeight = iImageHeight;
+    pImageAnalysis->iPrevPartitions = 0;
 
     CheckAllocatedMemory(pImageAnalysisRgb);
 

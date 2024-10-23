@@ -153,12 +153,14 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="imageanalysis-rgb.h" />
+    <ClInclude Include="imageanalysis-yuy2.h" />
     <ClInclude Include="imageanalysis.h" />
     <ClInclude Include="printanalysis-gst.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="gstplugin.c" />
     <ClCompile Include="imageanalysis-rgb.c" />
+    <ClCompile Include="imageanalysis-yuy2.c" />
     <ClCompile Include="imageanalysis.c" />
     <ClCompile Include="printanalysis-gst.c" />
   </ItemGroup>

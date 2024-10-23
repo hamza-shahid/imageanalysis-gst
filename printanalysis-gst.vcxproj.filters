@@ -24,6 +24,9 @@
     <ClInclude Include="imageanalysis-rgb.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="imageanalysis-yuy2.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="printanalysis-gst.c">
@@ -36,6 +39,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="imageanalysis.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="imageanalysis-yuy2.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

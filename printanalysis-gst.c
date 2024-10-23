@@ -2,6 +2,7 @@
 
 #include "printanalysis-gst.h"
 #include "imageanalysis-rgb.h"
+#include "imageanalysis-yuy2.h"
 
 GST_DEBUG_CATEGORY_STATIC (printanalysis_debug);
 #define GST_CAT_DEFAULT (printanalysis_debug)
@@ -24,7 +25,7 @@ GST_ELEMENT_REGISTER_DEFINE (printanalysis, "printanalysis",
     GST_RANK_NONE, gst_print_analysis_get_type ());
 
 #define CAPS_STR GST_VIDEO_CAPS_MAKE ("{ " \
-    "ARGB, BGRA, ABGR, RGBA, xRGB, BGRx, xBGR, RGBx, RGB, BGR, AYUV }")
+    "ARGB, BGRA, ABGR, RGBA, xRGB, BGRx, xBGR, RGBx, RGB, BGR, AYUV, YUY2 }")
 
 static GstStaticPadTemplate gst_print_analysis_src_template =
 GST_STATIC_PAD_TEMPLATE ("src",
@@ -70,6 +71,16 @@ static gboolean gst_print_analysis_set_info (GstVideoFilter * vfilter, GstCaps *
 		filter->pImageAnalysis->init = init_rgb;
 		filter->pImageAnalysis->deinit = deinit_rgb;
 		filter->pImageAnalysis->analyze = analyize_rgb;
+
+		// initialize image analysis
+		filter->pImageAnalysis->init(filter->pImageAnalysis, &opts, filter->width, filter->height);
+		break;
+
+	case GST_VIDEO_FORMAT_YUY2:
+		filter->pImageAnalysis = calloc(1, sizeof(ImageAnalysisYUY2));
+		filter->pImageAnalysis->init = init_yuy2;
+		filter->pImageAnalysis->deinit = deinit_yuy2;
+		filter->pImageAnalysis->analyze = analyize_yuy2;
 
 		// initialize image analysis
 		filter->pImageAnalysis->init(filter->pImageAnalysis, &opts, filter->width, filter->height);
