@@ -1,5 +1,6 @@
 #include <limits.h>
 #include <gst/gst.h>
+#include <stdio.h>
 
 #include "imageanalysis-rgb.h"
 
@@ -343,6 +344,64 @@ void ComputeHistogram(ImageAnalysisRGB* pImageAnalysisRgb, guint8* pImage)
     PlotValues(pImageAnalysisRgb, pImage);
 }
 
+static void ComputePartitionTotal(ImageAnalysis* pImageAnalysis, guint8* pImage, PrintPartition* pPartition)
+{
+    //ImageAnalysis* pImageAnalysis = GST_IMAGE_ANALYSIS(pImageAnalysisRgb);
+    int nStartX = pPartition->centerX - pPartition->width / 2;
+    int nEndX = nStartX + pPartition->width;
+    int nStartY = pPartition->centerY - pPartition->height / 2;
+    int nEndY = nStartY + pPartition->height;
+
+    pPartition->total = (Pixel) { 0, 0, 0 };
+
+    for (int y = nStartY; y < nEndY; y++)
+    {
+        RGBQUAD* pRGB = (RGBQUAD*)ROW(pImage, pImageAnalysis->iImageWidth, y);
+
+        for (int x = nStartX; x < nEndX; x++)
+        {
+            pPartition->total.rgb.r += pRGB[x].rgbRed;
+            pPartition->total.rgb.g += pRGB[x].rgbGreen;
+            pPartition->total.rgb.b += pRGB[x].rgbBlue;
+        }
+    }
+}
+
+static void DrawPartition(ImageAnalysis* pImageAnalysis, guint8* pImage, PrintPartition* pPartition)
+{
+    int x0 = pPartition->centerX - pPartition->width / 2;
+    int x1 = x0 + pPartition->width;
+    int y0 = pPartition->centerY - pPartition->height / 2;
+    int y1 = y0 + pPartition->height;
+
+    RGBQUAD* pRgb0 = (RGBQUAD*)ROW(pImage, pImageAnalysis->iImageWidth, y0);
+    RGBQUAD* pRgb1 = (RGBQUAD*)ROW(pImage, pImageAnalysis->iImageWidth, y1);
+
+    for (int x = x0; x < x1; x++)
+        pRgb0[x] = pRgb1[x] = RGB_BLACK;
+
+
+    for (int y = y0; y < y1; y++)
+    {
+        RGBQUAD* pRGB = (RGBQUAD*)ROW(pImage, pImageAnalysis->iImageWidth, y);
+        pRGB[x0] = pRGB[x1] = RGB_BLACK;
+    }
+}
+
+void ComputeTotal(ImageAnalysisRGB* pImageAnalysisRgb, guint8* pImage)
+{
+    ImageAnalysis* pImageAnalysis = GST_IMAGE_ANALYSIS(pImageAnalysisRgb);
+
+    if (pImageAnalysis->bPartitionsReady)
+    {
+        for (int i = 0; i < pImageAnalysis->nPartitions; i++)
+            ComputePartitionTotal(pImageAnalysis, pImage, &pImageAnalysis->pPartitions[i]);
+    }
+
+    for (int i = 0; i < pImageAnalysis->nPartitions; i++)
+        DrawPartition(pImageAnalysis, pImage, &pImageAnalysis->pPartitions[i]);
+}
+
 void init_rgb(ImageAnalysis* pImageAnalysis, AnalysisOpts* opts, int iImageWidth, int iImageHeight)
 {
     ImageAnalysisRGB* pImageAnalysisRgb = GST_IMAGE_ANALYSIS_RGB(pImageAnalysis);
@@ -391,6 +450,10 @@ void analyize_rgb(ImageAnalysis* pImageAnalysis, GstVideoFrame* frame)
 
     case HISTOGRAM:
         ComputeHistogram(pImageAnalysisRgb, pImage);
+        break;
+
+    case TOTAL:
+        ComputeTotal(pImageAnalysisRgb, pImage);
         break;
 
     default:

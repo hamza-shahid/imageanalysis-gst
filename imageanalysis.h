@@ -9,7 +9,8 @@ typedef enum
 	INTENSITY = 0,
 	MEAN = 1,
 	HISTOGRAM = 2,
-	NONE = 3
+	TOTAL = 3,
+	NONE = 4
 } AnalysisType;
 
 typedef enum
@@ -26,6 +27,22 @@ typedef enum
 	GRAY_NONE
 } GrayscaleType;
 
+typedef union
+{
+	struct 
+	{
+		gint r;
+		gint g;
+		gint b;
+	} rgb;
+
+	struct {
+		gint y;
+		gint u;
+		gint v;
+	} yuv;
+} Pixel;
+
 typedef struct AnalysisOpts
 {
 	AnalysisType	analysisType;
@@ -36,6 +53,17 @@ typedef struct AnalysisOpts
 	GrayscaleType	grayscaleType;
 } AnalysisOpts;
 
+typedef struct PrintPartition
+{
+	gint id;
+	gint centerX;
+	gint centerY;
+	gint width;
+	gint height;
+
+	Pixel total;
+} PrintPartition;
+
 typedef struct _ImageAnalysis ImageAnalysis;
 
 struct _ImageAnalysis
@@ -44,6 +72,10 @@ struct _ImageAnalysis
 	int				iPrevPartitions;
 	int				iImageWidth;
 	int				iImageHeight;
+
+	PrintPartition*	pPartitions;
+	int				nPartitions;
+	gboolean		bPartitionsReady;
 
 	void (*init) (ImageAnalysis* pImageAnalysis, AnalysisOpts *opts, int iImageWidth, int iImageHeight);
 	void (*deinit) (ImageAnalysis* pImageAnalysis);
@@ -54,3 +86,6 @@ struct _ImageAnalysis
 
 double NormalizeValue(double fValue, double fOrigRange, double fMinOrig, double fNewRange, double fMinNew);
 void UpdatePrintAnalysisOpts(ImageAnalysis* pImageAnalysis, AnalysisOpts* pOpts);
+
+gboolean ParsePartitionsFromString(ImageAnalysis* pImageAnalysis, const gchar* pJsonStr);
+char* PartitionsArrayToJsonStr(ImageAnalysis* pImageAnalysis);

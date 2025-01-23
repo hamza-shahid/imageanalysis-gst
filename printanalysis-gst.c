@@ -11,6 +11,7 @@ enum
 {
 	PROP_0,
 	PROP_ANALYSIS_TYPE,
+	PROP_PARTITIONS_JSON,
 	PROP_AOI_HEIGHT,
 	PROP_PARTITIONS,
 	PROP_CONNECT_VALUES,
@@ -18,6 +19,14 @@ enum
 	PROP_GRAYSCALE_TYPE,
 	PROP_LAST
 };
+
+enum {
+	AOI_TOTAL_SIGNAL,
+	NUM_SIGNALS
+};
+
+static guint gst_print_analysis_signals[NUM_SIGNALS] = { 0 };
+
 
 #define gst_print_analysis_parent_class parent_class
 G_DEFINE_TYPE (GstPrintAnalysis, gst_print_analysis, GST_TYPE_VIDEO_FILTER);
@@ -102,8 +111,23 @@ static GstFlowReturn gst_print_analysis_transform_frame_ip (GstVideoFilter * vfi
 	if (!filter->pImageAnalysis)
 		goto not_negotiated;
 
+	time_t currentTime;
+	time(&currentTime);
+
 	GST_OBJECT_LOCK (filter);
 	filter->pImageAnalysis->analyze (filter->pImageAnalysis, out);
+
+	if (filter->analysisType == TOTAL && filter->pImageAnalysis->bPartitionsReady)
+	{
+		gchar* pPartitionsJsonStr = PartitionsArrayToJsonStr(filter->pImageAnalysis);
+		
+		if (pPartitionsJsonStr)
+			g_signal_emit(GST_PRINT_ANALYSIS(vfilter), gst_print_analysis_signals[AOI_TOTAL_SIGNAL], 0, pPartitionsJsonStr);
+
+		filter->pImageAnalysis->bPartitionsReady = FALSE;
+		filter->prevSingalEmitTime = currentTime;
+	}
+
 	GST_OBJECT_UNLOCK (filter);
 
 	return GST_FLOW_OK;
@@ -125,6 +149,16 @@ static void gst_print_analysis_set_property(GObject * object, guint prop_id, con
 		filter->analysisType = (AnalysisType) g_value_get_uint(value);
 		break;
 
+	case PROP_PARTITIONS_JSON:
+		if (filter->pImageAnalysis)
+		{
+			ParsePartitionsFromString(filter->pImageAnalysis, g_value_get_string(value));
+
+			if (filter->pImageAnalysis->nPartitions)
+				filter->pImageAnalysis->bPartitionsReady = TRUE;
+		}
+		break;
+	
 	case PROP_AOI_HEIGHT:
 		filter->aoiHeight = g_value_get_uint(value);
 		break;
@@ -177,6 +211,10 @@ static void gst_print_analysis_get_property(GObject * object, guint prop_id, GVa
 		g_value_set_uint(value, filter->analysisType);
 		break;
 	
+	case PROP_PARTITIONS_JSON:
+		g_value_set_string(value, "");
+		break;
+
 	case PROP_AOI_HEIGHT:
 		g_value_set_uint(value, filter->aoiHeight);
 		break;
@@ -231,6 +269,16 @@ static void gst_print_analysis_class_init (GstPrintAnalysisClass * klass)
 	
 	g_object_class_install_property(
 		gobject_class,
+		PROP_PARTITIONS_JSON,
+		g_param_spec_string(
+			"partitions-json",
+			"Partitions Json",
+			"Partitions (AOIs) of image to be analyzed",
+			NULL,
+			G_PARAM_READWRITE));
+	
+	g_object_class_install_property(
+		gobject_class,
 		PROP_AOI_HEIGHT,
 		g_param_spec_uint(
 			"aoi-height",
@@ -240,7 +288,7 @@ static void gst_print_analysis_class_init (GstPrintAnalysisClass * klass)
 			UINT_MAX,
 			0,
 			G_PARAM_READWRITE));
-	
+
 	g_object_class_install_property(
 		gobject_class,
 		PROP_PARTITIONS,
@@ -287,6 +335,19 @@ static void gst_print_analysis_class_init (GstPrintAnalysisClass * klass)
 			GRAY_NONE,
 			G_PARAM_READWRITE));
 	
+	gst_print_analysis_signals[AOI_TOTAL_SIGNAL] = g_signal_new(
+		"aoi-total-signal",                 // Signal name
+		G_TYPE_FROM_CLASS(klass),           // Signal owner type
+		G_SIGNAL_RUN_LAST,                  // Signal flags
+		0,									// Default handler offset
+		NULL,								// Accumulator
+		NULL,								// Accumulator data
+		NULL,								// Custom marshaller
+		G_TYPE_NONE,						// Return type
+		1,									// Number of parameters
+		G_TYPE_STRING					    // Parameter type: String
+	);
+
 	vfilter_class->set_info = GST_DEBUG_FUNCPTR(gst_print_analysis_set_info);
 	vfilter_class->transform_frame_ip =
 		GST_DEBUG_FUNCPTR(gst_print_analysis_transform_frame_ip);
@@ -319,4 +380,6 @@ static void gst_print_analysis_init(GstPrintAnalysis* filter)
 {
 	GObjectClass* gobject_class = G_OBJECT_CLASS(filter);
 	//gobject_class->finalize = gst_print_analysis_finalize;
+
+	filter->prevSingalEmitTime = 0;
 }

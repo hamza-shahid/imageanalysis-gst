@@ -43,6 +43,8 @@ struct _GstPrintAnalysis
 	GrayscaleType grayscaleType;
 
 	ImageAnalysis* pImageAnalysis;
+
+	time_t prevSingalEmitTime;
 	//void (*process) (GstPrintAnalysis* filter, GstVideoFrame * frame);
 };
 
