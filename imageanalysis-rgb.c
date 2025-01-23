@@ -377,10 +377,11 @@ static void DrawPartition(ImageAnalysis* pImageAnalysis, guint8* pImage, PrintPa
     RGBQUAD* pRgb0 = (RGBQUAD*)ROW(pImage, pImageAnalysis->iImageWidth, y0);
     RGBQUAD* pRgb1 = (RGBQUAD*)ROW(pImage, pImageAnalysis->iImageWidth, y1);
 
+    // draw the horizontal lines
     for (int x = x0; x < x1; x++)
         pRgb0[x] = pRgb1[x] = RGB_BLACK;
 
-
+    // draw the vertical lines
     for (int y = y0; y < y1; y++)
     {
         RGBQUAD* pRGB = (RGBQUAD*)ROW(pImage, pImageAnalysis->iImageWidth, y);
@@ -388,7 +389,7 @@ static void DrawPartition(ImageAnalysis* pImageAnalysis, guint8* pImage, PrintPa
     }
 }
 
-void ComputeTotal(ImageAnalysisRGB* pImageAnalysisRgb, guint8* pImage)
+static void ComputeTotal(ImageAnalysisRGB* pImageAnalysisRgb, guint8* pImage)
 {
     ImageAnalysis* pImageAnalysis = GST_IMAGE_ANALYSIS(pImageAnalysisRgb);
 

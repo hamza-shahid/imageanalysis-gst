@@ -455,6 +455,73 @@ static void ComputeHistogram(ImageAnalysisYUY2* pImageAnalysisYuy2, guint8* pIma
     PlotValuesYUV(pImageAnalysisYuy2, pImage);
 }
 
+static void ComputePartitionTotal(ImageAnalysis* pImageAnalysis, guint8* pImage, PrintPartition* pPartition)
+{
+    int nStartX = pPartition->centerX - pPartition->width / 2;
+    int nEndX = nStartX + pPartition->width;
+    int nStartY = pPartition->centerY - pPartition->height / 2;
+    int nEndY = nStartY + pPartition->height;
+
+    pPartition->total = (Pixel){ 0, 0, 0 };
+    
+    // make multiple to 2
+    nStartX = (nStartX >> 1) << 1;
+    nEndX = (nEndX >> 1) << 1;
+
+    for (int y = nStartY; y < nEndY; y++)
+    {
+        YUY2PIXEL* pYUV = (YUY2PIXEL*)ROW(pImage, pImageAnalysis->iImageWidth, y);
+
+        for (int x = nStartX; x < nEndX; x += 2)
+        {
+            pPartition->total.yuv.y += pYUV[x].luma;
+            pPartition->total.yuv.u += pYUV[x].chroma;
+        }
+
+        for (int x = nStartX + 1; x < nEndX; x += 2)
+        {
+            pPartition->total.yuv.y += pYUV[x].luma;
+            pPartition->total.yuv.v += pYUV[x].chroma;
+        }
+    }
+}
+
+static void DrawPartition(ImageAnalysis* pImageAnalysis, guint8* pImage, PrintPartition* pPartition)
+{
+    int x0 = pPartition->centerX - pPartition->width / 2;
+    int x1 = x0 + pPartition->width;
+    int y0 = pPartition->centerY - pPartition->height / 2;
+    int y1 = y0 + pPartition->height;
+
+    YUY2PIXEL* pYUV0 = (YUY2PIXEL*)ROW(pImage, pImageAnalysis->iImageWidth, y0);
+    YUY2PIXEL* pYUV1 = (YUY2PIXEL*)ROW(pImage, pImageAnalysis->iImageWidth, y1);
+
+    // draw the horizontal lines
+    for (int x = x0; x < x1; x++)
+        pYUV0[x] = pYUV1[x] = YUY2_BLACK;
+
+    // draw the vertical lines
+    for (int y = y0; y < y1; y++)
+    {
+        YUY2PIXEL* pYUV = (YUY2PIXEL*)ROW(pImage, pImageAnalysis->iImageWidth, y);
+        pYUV[x0] = pYUV[x1] = YUY2_BLACK;
+    }
+}
+
+static void ComputeTotal(ImageAnalysisYUY2* pImageAnalysisRgb, guint8* pImage)
+{
+    ImageAnalysis* pImageAnalysis = GST_IMAGE_ANALYSIS(pImageAnalysisRgb);
+
+    if (pImageAnalysis->bPartitionsReady)
+    {
+        for (int i = 0; i < pImageAnalysis->nPartitions; i++)
+            ComputePartitionTotal(pImageAnalysis, pImage, &pImageAnalysis->pPartitions[i]);
+    }
+
+    for (int i = 0; i < pImageAnalysis->nPartitions; i++)
+        DrawPartition(pImageAnalysis, pImage, &pImageAnalysis->pPartitions[i]);
+}
+
 void init_yuy2(ImageAnalysis* pImageAnalysis, AnalysisOpts* opts, int iImageWidth, int iImageHeight)
 {
     ImageAnalysisYUY2* pImageAnalysisYuy2 = GST_IMAGE_ANALYSIS_YUY2(pImageAnalysis);
@@ -513,6 +580,10 @@ void analyize_yuy2(ImageAnalysis* pImageAnalysis, GstVideoFrame* frame)
 
     case HISTOGRAM:
         ComputeHistogram(pImageAnalysisYuy2, pImage);
+        break;
+
+    case TOTAL:
+        ComputeTotal(pImageAnalysisYuy2, pImage);
         break;
 
     default:
