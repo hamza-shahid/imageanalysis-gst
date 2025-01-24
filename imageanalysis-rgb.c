@@ -346,13 +346,18 @@ void ComputeHistogram(ImageAnalysisRGB* pImageAnalysisRgb, guint8* pImage)
 
 static void ComputePartitionTotal(ImageAnalysis* pImageAnalysis, guint8* pImage, PrintPartition* pPartition)
 {
-    //ImageAnalysis* pImageAnalysis = GST_IMAGE_ANALYSIS(pImageAnalysisRgb);
     int nStartX = pPartition->centerX - pPartition->width / 2;
     int nEndX = nStartX + pPartition->width;
     int nStartY = pPartition->centerY - pPartition->height / 2;
     int nEndY = nStartY + pPartition->height;
 
     pPartition->total = (Pixel) { 0, 0, 0 };
+    pPartition->nonUniformity = (Pixel){ 0, 0, 0 };
+
+    if (pPartition->colTotal)
+        free(pPartition->colTotal);
+
+    pPartition->colTotal = calloc(pPartition->width, sizeof(Pixel));
 
     for (int y = nStartY; y < nEndY; y++)
     {
@@ -360,10 +365,36 @@ static void ComputePartitionTotal(ImageAnalysis* pImageAnalysis, guint8* pImage,
 
         for (int x = nStartX; x < nEndX; x++)
         {
+            pPartition->colTotal[x - nStartX].rgb.r += pRGB[x].rgbRed;
+            pPartition->colTotal[x - nStartX].rgb.g += pRGB[x].rgbGreen;
+            pPartition->colTotal[x - nStartX].rgb.b += pRGB[x].rgbBlue;
+            
             pPartition->total.rgb.r += pRGB[x].rgbRed;
             pPartition->total.rgb.g += pRGB[x].rgbGreen;
             pPartition->total.rgb.b += pRGB[x].rgbBlue;
         }
+    }
+
+    pPartition->avg.rgb.r = pPartition->total.rgb.r / pPartition->width;
+    pPartition->avg.rgb.g = pPartition->total.rgb.g / pPartition->width;
+    pPartition->avg.rgb.b = pPartition->total.rgb.b / pPartition->width;
+
+    pPartition->min.rgb.r = pPartition->min.rgb.g = pPartition->min.rgb.b = INT_MAX;
+    pPartition->max.rgb.r = pPartition->max.rgb.g = pPartition->max.rgb.b = 0;
+
+    for (int i = 0; i < pPartition->width; i++)
+    {
+        pPartition->min.rgb.r = pPartition->colTotal[i].rgb.r < pPartition->min.rgb.r ? pPartition->colTotal[i].rgb.r : pPartition->min.rgb.r;
+        pPartition->min.rgb.g = pPartition->colTotal[i].rgb.g < pPartition->min.rgb.g ? pPartition->colTotal[i].rgb.g : pPartition->min.rgb.g;
+        pPartition->min.rgb.b = pPartition->colTotal[i].rgb.b < pPartition->min.rgb.b ? pPartition->colTotal[i].rgb.b : pPartition->min.rgb.b;
+
+        pPartition->max.rgb.r = pPartition->colTotal[i].rgb.r > pPartition->max.rgb.r ? pPartition->colTotal[i].rgb.r : pPartition->max.rgb.r;
+        pPartition->max.rgb.g = pPartition->colTotal[i].rgb.g > pPartition->max.rgb.g ? pPartition->colTotal[i].rgb.g : pPartition->max.rgb.g;
+        pPartition->max.rgb.b = pPartition->colTotal[i].rgb.b > pPartition->max.rgb.b ? pPartition->colTotal[i].rgb.b : pPartition->max.rgb.b;
+
+        pPartition->nonUniformity.rgb.r += abs(pPartition->colTotal[i].rgb.r - pPartition->avg.rgb.r);
+        pPartition->nonUniformity.rgb.g += abs(pPartition->colTotal[i].rgb.g - pPartition->avg.rgb.g);
+        pPartition->nonUniformity.rgb.b += abs(pPartition->colTotal[i].rgb.b - pPartition->avg.rgb.b);
     }
 }
 

@@ -112,10 +112,22 @@ char* PartitionsArrayToJsonStr(ImageAnalysis* pImageAnalysis)
             continue;
         }
 
-        char pTotalStr[128];
+        char pTmpStr[128];
         
-        snprintf(pTotalStr, sizeof(pTotalStr), "%d,%d,%d", pImageAnalysis->pPartitions[i].total.rgb.r, pImageAnalysis->pPartitions[i].total.rgb.g, pImageAnalysis->pPartitions[i].total.rgb.b);
-        cJSON_AddStringToObject(pPartition, "total", pTotalStr);
+        snprintf(pTmpStr, sizeof(pTmpStr), "%d,%d,%d", pImageAnalysis->pPartitions[i].total.rgb.r, pImageAnalysis->pPartitions[i].total.rgb.g, pImageAnalysis->pPartitions[i].total.rgb.b);
+        cJSON_AddStringToObject(pPartition, "total", pTmpStr);
+
+        snprintf(pTmpStr, sizeof(pTmpStr), "%d,%d,%d", pImageAnalysis->pPartitions[i].avg.rgb.r, pImageAnalysis->pPartitions[i].avg.rgb.g, pImageAnalysis->pPartitions[i].avg.rgb.b);
+        cJSON_AddStringToObject(pPartition, "average", pTmpStr);
+
+        snprintf(pTmpStr, sizeof(pTmpStr), "%d,%d,%d", pImageAnalysis->pPartitions[i].min.rgb.r, pImageAnalysis->pPartitions[i].min.rgb.g, pImageAnalysis->pPartitions[i].min.rgb.b);
+        cJSON_AddStringToObject(pPartition, "min", pTmpStr);
+
+        snprintf(pTmpStr, sizeof(pTmpStr), "%d,%d,%d", pImageAnalysis->pPartitions[i].max.rgb.r, pImageAnalysis->pPartitions[i].max.rgb.g, pImageAnalysis->pPartitions[i].max.rgb.b);
+        cJSON_AddStringToObject(pPartition, "max", pTmpStr);
+
+        snprintf(pTmpStr, sizeof(pTmpStr), "%d,%d,%d", pImageAnalysis->pPartitions[i].nonUniformity.rgb.r, pImageAnalysis->pPartitions[i].nonUniformity.rgb.g, pImageAnalysis->pPartitions[i].nonUniformity.rgb.b);
+        cJSON_AddStringToObject(pPartition, "non-uniformity", pTmpStr);
 
         // Add the partition to the array
         cJSON_AddItemToArray(pPartitions, pPartition);

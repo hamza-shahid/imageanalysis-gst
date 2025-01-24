@@ -62,6 +62,10 @@ typedef struct PrintPartition
 	gint height;
 
 	Pixel total;
+	Pixel min, max;
+	Pixel nonUniformity;
+	Pixel avg;
+	Pixel *colTotal;
 } PrintPartition;
 
 typedef struct _ImageAnalysis ImageAnalysis;
