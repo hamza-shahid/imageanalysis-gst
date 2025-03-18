@@ -350,7 +350,14 @@ static void ComputePartitionTotal(ImageAnalysis* pImageAnalysis, guint8* pImage,
     int nEndX = nStartX + pPartition->width;
     int nStartY = pPartition->centerY - pPartition->height / 2;
     int nEndY = nStartY + pPartition->height;
-
+	gint pW = pPartition->width, pH = pPartition->height;
+	double bg_r = pPartition->bg.rgb.r*pH, bg_g = pPartition->bg.rgb.g*pH, bg_b = pPartition->bg.rgb.b*pH;
+	double bg_k = min(bg_r, min(bg_g, bg_b));
+    double satR, satG, satB, satK;
+    double satRmin, satGmin, satBmin, satKmin;
+    double satRmax, satGmax, satBmax, satKmax;
+    double satRavg, satGavg, satBavg, satKavg;
+    double satRtot, satGtot, satBtot, satKtot;
     pPartition->total = (Pixel) { 0, 0, 0 };
     pPartition->nonUniformity = (Pixel){ 0, 0, 0 };
 
@@ -382,8 +389,29 @@ static void ComputePartitionTotal(ImageAnalysis* pImageAnalysis, guint8* pImage,
     pPartition->min.rgb.r = pPartition->min.rgb.g = pPartition->min.rgb.b = INT_MAX;
     pPartition->max.rgb.r = pPartition->max.rgb.g = pPartition->max.rgb.b = 0;
 
+	satRmin = satGmin = satBmin = satKmin = DBL_MAX;
+	satRmax = satGmax = satBmax = satKmax = 0.0;
+	satRtot = satGtot = satBtot = satKtot = 0.0;
+
     for (int i = 0; i < pPartition->width; i++)
     {
+		Pixel* pCol = &pPartition->colTotal[i];
+		gint R = pCol->rgb.r / pH, G = pCol->rgb.g / pH, B = pCol->rgb.b / pH;
+		gint Rbg = bg_r / pH, Gbg = bg_g / pH, Bbg = bg_b / pH;
+		satR = 1.0 - ((double)pCol->rgb.r / bg_r); 
+		satG = 1.0 - ((double)pCol->rgb.g / bg_g);
+		satB = 1.0 - ((double)pCol->rgb.b / bg_b);
+		pCol->rgb.k = min(pCol->rgb.r, min(pCol->rgb.g, pCol->rgb.b));
+        satK = 1.0 - ((double)pCol->rgb.k / bg_k);
+
+        satR = max(satR, 0.0); satG = max(satG, 0.0);
+        satB = max(satB, 0.0); satK = max(satK, 0.0);
+		satRmin = min(satR, satRmin); satGmin = min(satG, satGmin); 
+        satBmin = min(satB, satBmin); satKmin = min(satK, satKmin);
+		satRmax = max(satR, satRmax); satGmax = max(satG, satGmax);
+		satBmax = max(satB, satBmax); satKmax = max(satK, satKmax);
+        satRtot += satR; satGtot += satG; satBtot += satB; satKtot += satK;
+
         pPartition->min.rgb.r = pPartition->colTotal[i].rgb.r < pPartition->min.rgb.r ? pPartition->colTotal[i].rgb.r : pPartition->min.rgb.r;
         pPartition->min.rgb.g = pPartition->colTotal[i].rgb.g < pPartition->min.rgb.g ? pPartition->colTotal[i].rgb.g : pPartition->min.rgb.g;
         pPartition->min.rgb.b = pPartition->colTotal[i].rgb.b < pPartition->min.rgb.b ? pPartition->colTotal[i].rgb.b : pPartition->min.rgb.b;
@@ -396,6 +424,28 @@ static void ComputePartitionTotal(ImageAnalysis* pImageAnalysis, guint8* pImage,
         pPartition->nonUniformity.rgb.g += abs(pPartition->colTotal[i].rgb.g - pPartition->avg.rgb.g);
         pPartition->nonUniformity.rgb.b += abs(pPartition->colTotal[i].rgb.b - pPartition->avg.rgb.b);
     }
+    satRavg = satRtot / pW;
+	satGavg = satGtot / pW;
+	satBavg = satBtot / pW;
+	satKavg = satKtot / pW;
+	pPartition->minSat.rgb.r = (gint)(satRmin*1000.0);
+	pPartition->minSat.rgb.g = (gint)(satGmin*1000.0);
+	pPartition->minSat.rgb.b = (gint)(satBmin*1000.0);
+    pPartition->minSat.rgb.k = (gint)(satKmin*1000.0);
+    pPartition->maxSat.rgb.r = (gint)(satRmax*1000.0);
+    pPartition->maxSat.rgb.g = (gint)(satGmax*1000.0);
+    pPartition->maxSat.rgb.b = (gint)(satBmax*1000.0);
+    pPartition->maxSat.rgb.k = (gint)(satKmax*1000.0);
+    pPartition->avgSat.rgb.r = (gint)(satRavg*1000.0);
+    pPartition->avgSat.rgb.g = (gint)(satGavg*1000.0);
+    pPartition->avgSat.rgb.b = (gint)(satBavg*1000.0);
+    pPartition->avgSat.rgb.k = (gint)(satKavg*1000.0);
+	pPartition->total.rgb.r /= (pPartition->width * pPartition->height);
+	pPartition->total.rgb.g /= (pPartition->width * pPartition->height);
+	pPartition->total.rgb.b /= (pPartition->width * pPartition->height);
+	pPartition->nonUniformity.rgb.r /= pPartition->width;
+	pPartition->nonUniformity.rgb.g /= pPartition->width;
+	pPartition->nonUniformity.rgb.b /= pPartition->width;
 }
 
 static void DrawPartition(ImageAnalysis* pImageAnalysis, guint8* pImage, PrintPartition* pPartition)
@@ -418,6 +468,8 @@ static void DrawPartition(ImageAnalysis* pImageAnalysis, guint8* pImage, PrintPa
         RGBQUAD* pRGB = (RGBQUAD*)ROW(pImage, pImageAnalysis->iImageWidth, y);
         pRGB[x0] = pRGB[x1] = RGB_BLACK;
     }
+
+    gdiplus_draw_rgb(pImageAnalysis->pGdiObj, pPartition->total.rgb.r, pPartition->total.rgb.g, pPartition->total.rgb.b, x0, y0);
 }
 
 static void ComputeTotal(ImageAnalysisRGB* pImageAnalysisRgb, guint8* pImage)
@@ -430,6 +482,8 @@ static void ComputeTotal(ImageAnalysisRGB* pImageAnalysisRgb, guint8* pImage)
             ComputePartitionTotal(pImageAnalysis, pImage, &pImageAnalysis->pPartitions[i]);
     }
 
+    gdiplus_init_context(pImageAnalysis->pGdiObj, pImage, pImageAnalysis->iImageWidth, pImageAnalysis->iImageHeight, pImageAnalysis->iStride);
+    
     for (int i = 0; i < pImageAnalysis->nPartitions; i++)
         DrawPartition(pImageAnalysis, pImage, &pImageAnalysis->pPartitions[i]);
 }

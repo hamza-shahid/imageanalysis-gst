@@ -80,6 +80,7 @@ static gboolean gst_print_analysis_set_info (GstVideoFilter * vfilter, GstCaps *
 		filter->pImageAnalysis->init = init_rgb;
 		filter->pImageAnalysis->deinit = deinit_rgb;
 		filter->pImageAnalysis->analyze = analyize_rgb;
+		filter->pImageAnalysis->pGdiObj = filter->gdiObj;
 
 		// initialize image analysis
 		filter->pImageAnalysis->init(filter->pImageAnalysis, &opts, filter->width, filter->height);
@@ -90,6 +91,7 @@ static gboolean gst_print_analysis_set_info (GstVideoFilter * vfilter, GstCaps *
 		filter->pImageAnalysis->init = init_yuy2;
 		filter->pImageAnalysis->deinit = deinit_yuy2;
 		filter->pImageAnalysis->analyze = analyize_yuy2;
+		filter->pImageAnalysis->pGdiObj = filter->gdiObj;
 
 		// initialize image analysis
 		filter->pImageAnalysis->init(filter->pImageAnalysis, &opts, filter->width, filter->height);
@@ -115,6 +117,9 @@ static GstFlowReturn gst_print_analysis_transform_frame_ip (GstVideoFilter * vfi
 	time(&currentTime);
 
 	GST_OBJECT_LOCK (filter);
+	
+	filter->pImageAnalysis->iStride = filter->stride = GST_VIDEO_FRAME_PLANE_STRIDE(out, 0);
+
 	filter->pImageAnalysis->analyze (filter->pImageAnalysis, out);
 
 	if (filter->analysisType == TOTAL && filter->pImageAnalysis->bPartitionsReady)
@@ -244,6 +249,24 @@ static void gst_print_analysis_get_property(GObject * object, guint prop_id, GVa
 	GST_OBJECT_UNLOCK(filter);
 }
 
+static void gst_print_analysis_finalize(GObject* object)
+{
+	GstPrintAnalysis* filter = GST_PRINT_ANALYSIS(object);
+	
+	if (filter->pImageAnalysis)
+	{
+		filter->pImageAnalysis->deinit(filter->pImageAnalysis);
+		free(filter->pImageAnalysis);
+		filter->pImageAnalysis = NULL;
+	}
+
+	if (filter->gdiObj)
+		gdiplus_shutdown(filter->gdiObj);
+
+	// Chain up to the parent class's finalize method
+	G_OBJECT_CLASS(gst_print_analysis_parent_class)->finalize(object);
+}
+
 static void gst_print_analysis_class_init (GstPrintAnalysisClass * klass)
 {
 	GObjectClass* gobject_class = (GObjectClass*)klass;
@@ -363,17 +386,7 @@ static void gst_print_analysis_class_init (GstPrintAnalysisClass * klass)
 		&gst_print_analysis_src_template);
 
 	//gst_type_mark_as_plugin_api(GST_TYPE_PRINT_ANALYSIS_PRESET, 0);
-}
-
-static void gst_print_analysis_finalize(GObject* object)
-{
-	GstPrintAnalysis* filter = GST_PRINT_ANALYSIS(object);
-	filter->pImageAnalysis->deinit(filter->pImageAnalysis);
-	free(filter->pImageAnalysis);
-	filter->pImageAnalysis = NULL;
-
-	// Chain up to the parent class's finalize method
-	G_OBJECT_CLASS(gst_print_analysis_parent_class)->finalize(object);
+	gobject_class->finalize = GST_DEBUG_FUNCPTR(gst_print_analysis_finalize);
 }
 
 static void gst_print_analysis_init(GstPrintAnalysis* filter)
@@ -382,4 +395,8 @@ static void gst_print_analysis_init(GstPrintAnalysis* filter)
 	//gobject_class->finalize = gst_print_analysis_finalize;
 
 	filter->prevSingalEmitTime = 0;
+	
+	filter->gdiObj = gdiplus_startup();
+
+	gdiplus_setfont(filter->gdiObj, L"Arial", 12, (color_c) {255, 255, 255});
 }

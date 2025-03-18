@@ -3,6 +3,8 @@
 #include <gst/gst.h>
 #include <gst/video/video.h>
 
+#include "gdiplus_c.h"
+
 
 typedef enum
 {
@@ -34,6 +36,7 @@ typedef union
 		gint r;
 		gint g;
 		gint b;
+		gint k;
 	} rgb;
 
 	struct {
@@ -66,6 +69,11 @@ typedef struct PrintPartition
 	Pixel nonUniformity;
 	Pixel avg;
 	Pixel *colTotal;
+
+	Pixel bg; //background usually cameras reading of white media
+	Pixel minSat;
+	Pixel maxSat;
+	Pixel avgSat;
 } PrintPartition;
 
 typedef struct _ImageAnalysis ImageAnalysis;
@@ -76,10 +84,13 @@ struct _ImageAnalysis
 	int				iPrevPartitions;
 	int				iImageWidth;
 	int				iImageHeight;
+	int				iStride;
 
 	PrintPartition*	pPartitions;
 	int				nPartitions;
 	gboolean		bPartitionsReady;
+
+	gdiplus_c*		pGdiObj;
 
 	void (*init) (ImageAnalysis* pImageAnalysis, AnalysisOpts *opts, int iImageWidth, int iImageHeight);
 	void (*deinit) (ImageAnalysis* pImageAnalysis);

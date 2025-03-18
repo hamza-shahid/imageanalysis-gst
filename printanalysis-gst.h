@@ -5,6 +5,7 @@
 #include <gst/video/gstvideofilter.h>
 
 #include "imageanalysis.h"
+#include "gdiplus_c.h"
 
 G_BEGIN_DECLS
 #define GST_TYPE_PRINT_ANALYSIS \
@@ -34,6 +35,7 @@ struct _GstPrintAnalysis
 	GstVideoFormat format;
 	gint width;
 	gint height;
+	gint stride;
 
 	AnalysisType analysisType;
 	guint aoiHeight;
@@ -46,6 +48,7 @@ struct _GstPrintAnalysis
 
 	time_t prevSingalEmitTime;
 	//void (*process) (GstPrintAnalysis* filter, GstVideoFrame * frame);
+	gdiplus_c* gdiObj;
 };
 
 struct _GstPrintAnalysisClass

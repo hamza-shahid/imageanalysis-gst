@@ -90,13 +90,13 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>.\thirdparty\cjson\include;$(GSTREAMER_1_0_ROOT_MSVC_X86_64)include\gstreamer-1.0;$(GSTREAMER_1_0_ROOT_MSVC_X86_64)include\glib-2.0;$(GSTREAMER_1_0_ROOT_MSVC_X86_64)include\glib-2.0\glib;$(GSTREAMER_1_0_ROOT_MSVC_X86_64)lib\glib-2.0\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\thirdparty\cjson\include;$(GSTREAMER_1_0_ROOT_MSVC_X86_64)include;$(GSTREAMER_1_0_ROOT_MSVC_X86_64)include\gstreamer-1.0;$(GSTREAMER_1_0_ROOT_MSVC_X86_64)include\glib-2.0;$(GSTREAMER_1_0_ROOT_MSVC_X86_64)include\glib-2.0\glib;$(GSTREAMER_1_0_ROOT_MSVC_X86_64)lib\glib-2.0\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>.\thirdparty\cjson\lib\$(Platform)\$(Configuration);$(GSTREAMER_1_0_ROOT_MSVC_X86_64)lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>cjson.lib;gstvideo-1.0.lib;gstbase-1.0.lib;gobject-2.0.lib;glib-2.0.lib;gstreamer-1.0.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>Gdiplus.lib;cjson.lib;gstvideo-1.0.lib;gstbase-1.0.lib;gobject-2.0.lib;glib-2.0.lib;gstreamer-1.0.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -107,7 +107,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>.\thirdparty\cjson\include;$(GSTREAMER_1_0_ROOT_MSVC_X86_64)include\gstreamer-1.0;$(GSTREAMER_1_0_ROOT_MSVC_X86_64)include\glib-2.0;$(GSTREAMER_1_0_ROOT_MSVC_X86_64)include\glib-2.0\glib;$(GSTREAMER_1_0_ROOT_MSVC_X86_64)lib\glib-2.0\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\thirdparty\cjson\include;$(GSTREAMER_1_0_ROOT_MSVC_X86_64)include;$(GSTREAMER_1_0_ROOT_MSVC_X86_64)include\gstreamer-1.0;$(GSTREAMER_1_0_ROOT_MSVC_X86_64)include\glib-2.0;$(GSTREAMER_1_0_ROOT_MSVC_X86_64)include\glib-2.0\glib;$(GSTREAMER_1_0_ROOT_MSVC_X86_64)lib\glib-2.0\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -115,7 +115,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>.\thirdparty\cjson\lib\$(Platform)\$(Configuration);$(GSTREAMER_1_0_ROOT_MSVC_X86_64)lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>cjson.lib;gstvideo-1.0.lib;gstbase-1.0.lib;gobject-2.0.lib;glib-2.0.lib;gstreamer-1.0.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>Gdiplus.lib;cjson.lib;gstvideo-1.0.lib;gstbase-1.0.lib;gobject-2.0.lib;glib-2.0.lib;gstreamer-1.0.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -124,13 +124,13 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>.\thirdparty\cjson\include;$(GSTREAMER_1_0_ROOT_MSVC_X86_64)include\gstreamer-1.0;$(GSTREAMER_1_0_ROOT_MSVC_X86_64)include\glib-2.0;$(GSTREAMER_1_0_ROOT_MSVC_X86_64)include\glib-2.0\glib;$(GSTREAMER_1_0_ROOT_MSVC_X86_64)lib\glib-2.0\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\thirdparty\cjson\include;$(GSTREAMER_1_0_ROOT_MSVC_X86_64)include;$(GSTREAMER_1_0_ROOT_MSVC_X86_64)include\gstreamer-1.0;$(GSTREAMER_1_0_ROOT_MSVC_X86_64)include\glib-2.0;$(GSTREAMER_1_0_ROOT_MSVC_X86_64)include\glib-2.0\glib;$(GSTREAMER_1_0_ROOT_MSVC_X86_64)lib\glib-2.0\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>.\thirdparty\cjson\lib\$(Platform)\$(Configuration);$(GSTREAMER_1_0_ROOT_MSVC_X86_64)lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>cjson.lib;gstvideo-1.0.lib;gstbase-1.0.lib;gobject-2.0.lib;glib-2.0.lib;gstreamer-1.0.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>Gdiplus.lib;cjson.lib;gstvideo-1.0.lib;gstbase-1.0.lib;gobject-2.0.lib;glib-2.0.lib;gstreamer-1.0.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -141,7 +141,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>.\thirdparty\cjson\include;$(GSTREAMER_1_0_ROOT_MSVC_X86_64)include\gstreamer-1.0;$(GSTREAMER_1_0_ROOT_MSVC_X86_64)include\glib-2.0;$(GSTREAMER_1_0_ROOT_MSVC_X86_64)include\glib-2.0\glib;$(GSTREAMER_1_0_ROOT_MSVC_X86_64)lib\glib-2.0\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\thirdparty\cjson\include;$(GSTREAMER_1_0_ROOT_MSVC_X86_64)include;$(GSTREAMER_1_0_ROOT_MSVC_X86_64)include\gstreamer-1.0;$(GSTREAMER_1_0_ROOT_MSVC_X86_64)include\glib-2.0;$(GSTREAMER_1_0_ROOT_MSVC_X86_64)include\glib-2.0\glib;$(GSTREAMER_1_0_ROOT_MSVC_X86_64)lib\glib-2.0\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -149,16 +149,18 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>.\thirdparty\cjson\lib\$(Platform)\$(Configuration);$(GSTREAMER_1_0_ROOT_MSVC_X86_64)lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>cjson.lib;gstvideo-1.0.lib;gstbase-1.0.lib;gobject-2.0.lib;glib-2.0.lib;gstreamer-1.0.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>Gdiplus.lib;cjson.lib;gstvideo-1.0.lib;gstbase-1.0.lib;gobject-2.0.lib;glib-2.0.lib;gstreamer-1.0.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="gdiplus_c.h" />
     <ClInclude Include="imageanalysis-rgb.h" />
     <ClInclude Include="imageanalysis-yuy2.h" />
     <ClInclude Include="imageanalysis.h" />
     <ClInclude Include="printanalysis-gst.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="gdiplus_c.cpp" />
     <ClCompile Include="gstplugin.c" />
     <ClCompile Include="imageanalysis-rgb.c" />
     <ClCompile Include="imageanalysis-yuy2.c" />
